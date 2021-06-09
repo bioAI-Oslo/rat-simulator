@@ -1,5 +1,4 @@
 import numpy as np
-from ctimeit import ctimeit  # custom timing of functions
 
 
 def batch_trajectory_generator(batch_size=64, *args, **kwargs):
