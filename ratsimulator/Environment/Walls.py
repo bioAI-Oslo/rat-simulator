@@ -22,7 +22,7 @@ class LinearWall:
     @property
     def isborderwall(self):
         # defines the boundaries of the environment
-        return 'border_wall' in self.name
+        return "border_wall" in self.name
 
     @property
     def iscorner(self):
@@ -30,7 +30,7 @@ class LinearWall:
         'Returns' two booleans in a tuple (e.g. (True, False) )
             that denote whether the bias or the end point intersects other walls
         """
-        b,e=False,False
+        b, e = False, False
         for intersec in self.intersects.values():
             b = b or (self.bias == intersec).all()
             e = e or (self.end == intersec).all()
@@ -40,7 +40,7 @@ class LinearWall:
             self.end in self.intersects.values(),
         )
         """
-        return b,e
+        return b, e
 
     def save_intersect(self, wall):
         """

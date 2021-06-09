@@ -63,7 +63,9 @@ class Agent:
         self._velocities = np.zeros(
             (0, 2)
         )  # velocity history (also N+1, but only when called)
-        self._positions = np.zeros((1, 2)) if p0 is None else p0  # position history
+        self._positions = (
+            np.zeros((1, 2)) + 1e-5 if p0 is None else p0
+        )  # position history
 
         # add size to rat? e.g as an ellipsoid?
 
@@ -138,18 +140,3 @@ class Agent:
             for pos, vel in zip(positions[::ds], self.velocities[::ds]):
                 ax.arrow(*pos, *vel, head_width=0.02, color=c[::ds][i])
                 i += 1
-
-
-if __name__ == "__main__":
-    """
-    Simple tests/inspection of class methods
-    """
-    ag = Agent(0, 0)
-
-    for i in range(100000):
-        ag.step()
-
-    print(ag.speeds)
-    print(ag.hds)
-    print(ag.velocities)
-    print(ag.positions.shape)

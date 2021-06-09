@@ -3,9 +3,10 @@ import abc
 
 class ABCEnvironment(metaclass=abc.ABCMeta):
     """
-    Abstract/skeleton class for alternative 
+    Abstract/skeleton class for alternative
     environments that the animal can traverse.
     """
+
     @abc.abstractmethod
     def __init__(self):
         pass
@@ -23,7 +24,7 @@ class ABCEnvironment(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def avoid_walls(self):
         """
-        Implements walls in the environment. 
+        Implements walls in the environment.
 
         An animal should not be able to reach positions
         outside the boundaries of the environment.
