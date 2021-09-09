@@ -19,18 +19,15 @@ def batch_trajectory_generator(batch_size=64, *args, **kwargs):
 
 
 def trajectory_generator(
-    environment, seq_len=20, start_angle=None, start_pos=None, **kwargs
+    environment, seq_len=20, angle0=None, p0=None, **kwargs
 ):
     # create agent
-    sa, sp = start_angle, start_pos
-    agent = Agent(
-        np.random.uniform(0, 2 * np.pi), environment.sample_uniform(1), **kwargs
-    )
+    agent = Agent()
 
     while True:
         # re-initialize agent
-        sa = np.random.uniform(0, 2 * np.pi) if start_angle is None else start_angle
-        sp = environment.sample_uniform(1) if start_pos is None else start_pos
+        sa = np.random.uniform(0, 2 * np.pi) if angle0 is None else angle0
+        sp = environment.sample_uniform(1) if p0 is None else p0
         agent.__init__(sa, sp, **kwargs)
 
         # generate track
