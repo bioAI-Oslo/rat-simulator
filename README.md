@@ -3,7 +3,7 @@ A rat in an environment simulator.
 
 
 ### Installation:
-`pip install rat-simulator`
+`$ pip install rat-simulator`
 
 
 ### Links to Project
