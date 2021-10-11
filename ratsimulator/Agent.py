@@ -64,6 +64,8 @@ class Agent:
             np.zeros((1, 2)) + 1e-5 if p0 is None else p0
         )  # position history
 
+        # TODO! Create a history of objects seen by rat
+
         # add size to rat? e.g as an ellipsoid?
 
     def step(self, avoid_walls, record_step=True):
@@ -78,6 +80,7 @@ class Agent:
         new_speed, new_turn = avoid_walls(
             self.positions[-1], self.hds[-1], new_speed, new_turn
         )
+        # TODO! Check to see if rat sees any objects with current pose
         new_hd = np.mod(self.hds[-1] + new_turn, 2 * np.pi)
 
         if record_step:
