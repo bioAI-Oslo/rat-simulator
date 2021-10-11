@@ -71,11 +71,12 @@ class Rectangle(ABCEnvironment):
                 SB2 = (W.T + n2).T  # soft boundary 2
                 ax.plot(*SB2, "orange")
 
-    def sample_uniform(self, ns=1):
+    def sample_uniform(self, ns=1, seed=None):
         """
         Uniform sampling a 2d-rectangle is trivial with numpy
         """
-        return np.random.uniform(self.origo, self.boxsize, size=(ns, 2))
+        rng = np.random.default_rng(seed=seed)
+        return rng.uniform(self.origo, self.boxsize, size=(ns, 2))
 
     def add_wall(self, name, bias, slope, t=[0, 1]):
         """Add wall to walls."""

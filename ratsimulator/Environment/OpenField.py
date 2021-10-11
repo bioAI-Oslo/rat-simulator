@@ -10,11 +10,12 @@ class OpenField(ABCEnvironment):
         """
         self.low, self.high = low, high
 
-    def sample_uniform(self, ns=1):
+    def sample_uniform(self, ns=1, seed=None):
         """
         Uniform sampling a 2d-rectangle is trivial with numpy
         """
-        return np.random.uniform(self.low, self.high, size=(ns, 2))
+        rng = np.random.default_rng(seed=seed)
+        return rng.uniform(self.low, self.high, size=(ns, 2))
 
     def avoid_walls(self, pos, hd, speed, turn):
         """No walls to avoid, return sampled speed and turn as is"""
