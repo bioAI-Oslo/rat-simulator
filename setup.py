@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rat-simulator",
-    version="1.0.1",
+    version="1.1.0",
     author="Vemund S. Schoyen",
     author_email="vemund@live.com",
     description="A rat in an environment simulator",
