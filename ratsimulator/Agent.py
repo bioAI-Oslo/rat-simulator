@@ -1,54 +1,56 @@
 import numpy as np
 
 
-def batch_trajectory_generator(batch_size=64, *args, **kwargs):
+def batch_trajectory_generator(batch_size=64, seq_len=20, *args, **kwargs):
     """Mini-batch trajectory generator"""
     tgen = trajectory_generator(*args, **kwargs)
-    seq_len = args[1] if len(args) >= 2 else kwargs["seq_len"]
     mb_pos, mb_vel = np.zeros((batch_size, seq_len + 1, 2)), np.zeros(
         (batch_size, seq_len + 1, 2)
     )
-
     while True:
         for i in range(batch_size):
             pos, vel = next(tgen)[:2]
             mb_pos[i] = pos
             mb_vel[i] = vel
-
         yield mb_pos, mb_vel
 
 
-def trajectory_generator(
-    environment, seq_len=20, angle0=None, p0=None, **kwargs
-):
+def trajectory_generator(environment, seq_len=20, angle0=None, p0=None, **kwargs):
     # create agent
-    agent = Agent()
-
+    agent = Agent(environment, **kwargs)
     while True:
         # re-initialize agent
-        sa = np.random.uniform(0, 2 * np.pi) if angle0 is None else angle0
-        sp = environment.sample_uniform(1) if p0 is None else p0
-        agent.__init__(sa, sp, **kwargs)
-
+        agent.reset(angle0, p0)
         # generate track
         for i in range(seq_len):
-            agent.step(environment.avoid_walls)
-
+            agent.step()
         yield agent.positions, agent.velocities, agent.hds, agent.speeds, agent.turns, agent
 
 
 class Agent:
     def __init__(
-        self, angle0=None, p0=None, dt=0.02, sigma=5.76 * 2, b=0.13 * 2 * np.pi, mu=0
+        self,
+        environment,
+        angle0=None,
+        p0=None,
+        dt=0.02,
+        turn_angle=5.76 * 2,
+        b=0.13 * 2 * np.pi,
+        mu=0,
+        **kwargs
     ):
         """
         default constants are the ones Sorscher used
         """
+        self.environment = environment
         self.dt = dt
-        self.sigma = sigma  # stdev rotation velocity (rads/sec)
+        self.turn_angle = turn_angle  # stdev rotation velocity (rads/sec)
         self.b = b  # forward velocity rayleigh dist scale (m/sec)
         self.mu = mu  # turn angle bias
 
+        self.reset(angle0, p0)
+
+    def reset(self, angle0=None, p0=None):
         # N+1 len array histories (since we include start pos and hd)
         self.hds = (
             np.random.uniform(0, 2 * np.pi, size=1)
@@ -61,23 +63,21 @@ class Agent:
             (0, 2)
         )  # velocity history (also N+1, but only when called)
         self._positions = (
-            np.zeros((1, 2)) + 1e-5 if p0 is None else p0
+            self.environment.sample_uniform(1) if p0 is None else p0
         )  # position history
 
         # TODO! Create a history of objects seen by rat
 
-        # add size to rat? e.g as an ellipsoid?
-
-    def step(self, avoid_walls, record_step=True):
+    def step(self, record_step=True):
         """
         Sample a velocity vector - indirectly through speed
         and angle, i.e. (s,phi). The angle is an offset to
         the angle at the previous time step.
         """
         new_speed = np.random.rayleigh(self.b) * self.dt
-        new_turn = np.random.normal(self.mu, self.sigma) * self.dt
+        new_turn = np.random.normal(self.mu, self.turn_angle) * self.dt
 
-        new_speed, new_turn = avoid_walls(
+        new_speed, new_turn = self.environment.avoid_walls(
             self.positions[-1], self.hds[-1], new_speed, new_turn
         )
         # TODO! Check to see if rat sees any objects with current pose
