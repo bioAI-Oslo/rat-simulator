@@ -37,6 +37,7 @@ class Agent:
         turn_angle=5.76 * 2,
         b=0.13 * 2 * np.pi,
         mu=0,
+        vfr = (np.pi/6, 0.5*np.pi),
         **kwargs
     ):
         """
@@ -47,6 +48,7 @@ class Agent:
         self.turn_angle = turn_angle  # stdev rotation velocity (rads/sec)
         self.b = b  # forward velocity rayleigh dist scale (m/sec)
         self.mu = mu  # turn angle bias
+        self.vfr = vfr #tuple of visual field angular range and radial range
 
         self.reset(angle0, p0)
 
@@ -80,7 +82,13 @@ class Agent:
         new_speed, new_turn = self.environment.avoid_walls(
             self.positions[-1], self.hds[-1], new_speed, new_turn
         )
-        # TODO! Check to see if rat sees any objects with current pose
+        # TODO! Check to see if rat sees any objects with current pose (position and orientation)
+        objects_observed = []
+        # TODO! Create class RectanglewObjects environment
+        # TODO! Fetch objects from environment, with IDs and corresponding position
+        if check_for_obj(obj_pos): #TODO! Change this to a for-loop check for all objects 
+            objects_observed.append((self.positions[-1], obj_id)) #receive ID
+
         new_hd = np.mod(self.hds[-1] + new_turn, 2 * np.pi)
 
         if record_step:
@@ -89,6 +97,18 @@ class Agent:
             self.turns = np.append(self.turns, new_turn)
 
         return new_speed, new_hd
+
+    def check_for_obj(self, obj_pos):
+        self.x, self.y = self.positions[-1]
+        obj_x, obj_y = obj_pos 
+        alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object 
+        dist = np.linalg.norm(self.positions[-1] - obj_pos)
+        vfr_ang, vfr_r = self. vfr # visual field range
+
+        if (dist <= vfr_r) and (abs(self.hds[-1] - alpha) <= vfr_ang):
+            return True
+
+
 
     @property
     def velocities(self):
