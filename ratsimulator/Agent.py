@@ -51,6 +51,9 @@ class Agent:
         self.vfr = vfr #tuple of visual field angular range and radial range
 
         self.reset(angle0, p0)
+        self.envm_objects = self.fetch_objects()
+        self.objects_observed = [] #list of objs observed at given positions
+    
 
     def reset(self, angle0=None, p0=None):
         # N+1 len array histories (since we include start pos and hd)
@@ -82,12 +85,11 @@ class Agent:
         new_speed, new_turn = self.environment.avoid_walls(
             self.positions[-1], self.hds[-1], new_speed, new_turn
         )
-        # TODO! Check to see if rat sees any objects with current pose (position and orientation)
-        objects_observed = []
-        # TODO! Create class RectanglewObjects environment
-        # TODO! Fetch objects from environment, with IDs and corresponding position
-        if check_for_obj(obj_pos): #TODO! Change this to a for-loop check for all objects 
-            objects_observed.append((self.positions[-1], obj_id)) #receive ID
+        # Check to see if rat sees any objects with current pose (position and orientation)
+                
+        objects_id_seen = self.check_for_objects(self.envm_objects)
+        if len(objects_id_seen) != 0: 
+            self.objects_observed.append((self.positions[-1], objects_id_seen)) 
 
         new_hd = np.mod(self.hds[-1] + new_turn, 2 * np.pi)
 
@@ -97,16 +99,27 @@ class Agent:
             self.turns = np.append(self.turns, new_turn)
 
         return new_speed, new_hd
+    
+    def fetch_objects(self):
+        objects = self.environment.objects
 
-    def check_for_obj(self, obj_pos):
+    def check_for_objects(self, objects):
         self.x, self.y = self.positions[-1]
-        obj_x, obj_y = obj_pos 
-        alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object 
-        dist = np.linalg.norm(self.positions[-1] - obj_pos)
-        vfr_ang, vfr_r = self. vfr # visual field range
+        objects_id_seen = []
+        for object in objects:
+            obj_id = object.id
+            obj_x = object.x
+            obj_y = object.y
+            obj_pos = object.position
+        
+            alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object 
+            dist = np.linalg.norm(self.positions[-1] - obj_pos)
+            vfr_ang, vfr_r = self.vfr # visual field range
 
-        if (dist <= vfr_r) and (abs(self.hds[-1] - alpha) <= vfr_ang):
-            return True
+            if (dist <= vfr_r) and (abs(self.hds[-1] - alpha) <= vfr_ang):
+                objects_id_seen.append(obj_id)
+            return objects_id_seen
+
 
 
 

@@ -5,6 +5,15 @@ from .ABCEnvironment import ABCEnvironment
 from .Walls import LinearWall
 from .methods import intersect, projection_rejection
 
+class Object(): 
+    #instances of class Object() are points in space with given ID
+    def __init__(self, id, position):
+        self.id = id
+        self.position = position
+        #self.x = position[0]
+        # self.y = position[1]
+        self.x = position[0, 0]  #in sample_uniform format
+        self.y = position[0, 1] #in sample_uniform format
 
 class RectanglewObjects(ABCEnvironment):
     def __init__(self, boxsize=(2.2, 2.2), soft_boundary=0.3, no_objects = 1):
@@ -12,6 +21,8 @@ class RectanglewObjects(ABCEnvironment):
         self.boxsize = np.array(boxsize)  # top right coordinate
         self.soft_boundary = soft_boundary
         self.no_objects = no_objects
+
+        self.objects = self.create_objects()
 
         # init walls
         self.walls = []
@@ -42,7 +53,15 @@ class RectanglewObjects(ABCEnvironment):
     #TODO! Define method to create objects (instances?) with position and id, called by __init__
     #TODO! Define method to fetch object attributes. Perhaps create a simple object class 
     def create_objects(self):
+        objects = []
         for i in range(self.no_objects):
+            coordinates = self.sample_uniform()
+            x = coordinates[0, 0]
+            y = coordinates[0, 1]
+            #objects.append(Object(id = i, position=[x,y]))
+            objects.append(Object(id = i, position=coordinates))
+        return objects #list with Object() instances
+
             
 
     def get_board(self, res=(32, 32)):
@@ -55,7 +74,7 @@ class RectanglewObjects(ABCEnvironment):
 
     def plot_board(self, ax):
         """
-        Plots board walls and soft boundaries
+        Plots board walls and soft boundaries and objects
         """
         for wall in self.walls:
             # plottable wall matrix
@@ -76,6 +95,10 @@ class RectanglewObjects(ABCEnvironment):
             ):
                 SB2 = (W.T + n2).T  # soft boundary 2
                 ax.plot(*SB2, "orange")
+
+        #plotting objects as points in board
+        for object in self.objects:
+            ax.plot(object.x, object.y, "ro")
 
     def sample_uniform(self, ns=1, seed=None):
         """
@@ -159,3 +182,5 @@ class RectanglewObjects(ABCEnvironment):
         # speed is maximum half the distance to the crash point
         speed = min(speed, euclidean(pos, intersection) / 2)
         return speed, turn
+
+env = RectanglewObjects()
