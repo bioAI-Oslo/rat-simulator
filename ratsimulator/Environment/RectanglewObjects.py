@@ -183,4 +183,4 @@ class RectanglewObjects(ABCEnvironment):
         speed = min(speed, euclidean(pos, intersection) / 2)
         return speed, turn
 
-env = RectanglewObjects()
+
