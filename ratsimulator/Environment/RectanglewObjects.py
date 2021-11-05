@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import euclidean
+import matplotlib.pyplot as plt
 
 from .ABCEnvironment import ABCEnvironment
 from .Walls import LinearWall
@@ -97,8 +98,9 @@ class RectanglewObjects(ABCEnvironment):
                 ax.plot(*SB2, "orange")
 
         #plotting objects as points in board
-        for object in self.objects:
-            ax.plot(object.x, object.y, "ro")
+        color = plt.cm.rainbow(np.linspace(0, 1, self.no_objects))
+        for i, object in enumerate(self.objects):
+            ax.plot(object.x, object.y, marker = ".", markersize = 10, c = color[i], label = object.id)
 
     def sample_uniform(self, ns=1, seed=None):
         """
