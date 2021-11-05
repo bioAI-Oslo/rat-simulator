@@ -53,6 +53,7 @@ class Agent:
         self.mu = mu  # turn angle bias
         self.vfr = vfr #tuple of visual field angular range and radial range
         self.reset(angle0, p0)
+        # TODO! Change condition below to check if environment is with objects
         if True: #isinstance(environment, RectanglewObjects):
             self.envm_objects = self.fetch_objects()
             self.objects_observed = self.check_for_objects(self.envm_objects) #[] #list of objs observed at given positions
@@ -124,7 +125,9 @@ class Agent:
 
             obj_y = object.y
             obj_pos = object.position
-        
+
+            #TODO! Check if there is an obstacle/wall between agent and object
+            #      This should block the visual field and object should not be stored.
             alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object 
             dist = np.linalg.norm(self.positions[-1] - obj_pos)
             vfr_ang, vfr_r = self.vfr # visual field range
