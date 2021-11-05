@@ -1,4 +1,7 @@
 import numpy as np
+import sys
+#sys.path.append("../") if "../" not in sys.path else None # avoid adding multiple relave paths to sys.path
+#from ratsimulator.Environment import RectanglewObjects
 
 
 def batch_trajectory_generator(batch_size=64, seq_len=20, *args, **kwargs):
@@ -37,7 +40,7 @@ class Agent:
         turn_angle=5.76 * 2,
         b=0.13 * 2 * np.pi,
         mu=0,
-        vfr = (np.pi/6, 0.5*np.pi),
+        vfr = (np.pi/6, 0.1*np.pi),
         **kwargs
     ):
         """
@@ -49,10 +52,13 @@ class Agent:
         self.b = b  # forward velocity rayleigh dist scale (m/sec)
         self.mu = mu  # turn angle bias
         self.vfr = vfr #tuple of visual field angular range and radial range
-
         self.reset(angle0, p0)
-        self.envm_objects = self.fetch_objects()
-        self.objects_observed = [] #list of objs observed at given positions
+        if True: #isinstance(environment, RectanglewObjects):
+            self.envm_objects = self.fetch_objects()
+            self.objects_observed = self.check_for_objects(self.envm_objects) #[] #list of objs observed at given positions
+            self.observe = True
+        else:
+            self.observe = False
     
 
     def reset(self, angle0=None, p0=None):
@@ -86,10 +92,13 @@ class Agent:
             self.positions[-1], self.hds[-1], new_speed, new_turn
         )
         # Check to see if rat sees any objects with current pose (position and orientation)
-                
-        objects_id_seen = self.check_for_objects(self.envm_objects)
-        if len(objects_id_seen) != 0: 
-            self.objects_observed.append((self.positions[-1], objects_id_seen)) 
+        if self.observe:  
+            self.objects_observed = np.append(self.objects_observed, self.check_for_objects(self.envm_objects), axis = 0)
+            # objects_id_seen = self.check_for_objects(self.envm_objects)
+
+
+            # if len(objects_id_seen) != 0: #remove this condition
+            #     self.objects_observed.append((self.positions[-1], objects_id_seen)) 
 
         new_hd = np.mod(self.hds[-1] + new_turn, 2 * np.pi)
 
@@ -102,13 +111,17 @@ class Agent:
     
     def fetch_objects(self):
         objects = self.environment.objects
+        return objects
 
     def check_for_objects(self, objects):
         self.x, self.y = self.positions[-1]
-        objects_id_seen = []
-        for object in objects:
+        #objects_id_seen = []
+        n_obj = len(objects) #number of objects
+        object_track_in_pose = np.zeros((1,n_obj)) #will track objects with current pose
+        for i, object in enumerate(objects): 
             obj_id = object.id
             obj_x = object.x
+
             obj_y = object.y
             obj_pos = object.position
         
@@ -117,10 +130,16 @@ class Agent:
             vfr_ang, vfr_r = self.vfr # visual field range
 
             if (dist <= vfr_r) and (abs(self.hds[-1] - alpha) <= vfr_ang):
-                objects_id_seen.append(obj_id)
-            return objects_id_seen
+                #objects_id_seen.append(obj_id)
+                object_track_in_pose[0,i] = 1
 
+        return object_track_in_pose #objects_id_seen
 
+    def track_objects_seen(self):
+        p_i = np.sum(self.objects_observed, axis = 1)>0 #Truth values where objects are detected
+        pos_obj_seen = self.positions[p_i] #positions of agent where objects are seen
+        obj_seen = self.objects_observed[p_i] #corresponding objects seen vectors 
+        return pos_obj_seen, obj_seen
 
 
     @property
@@ -148,7 +167,7 @@ class Agent:
         if idx0 == self.speeds.shape[0]:
             return self._positions
 
-        delta_p = np.cumsum(self.velocities[idx0:], axis=0)
+        delta_p = np.cumsum(self.velocities[idx0:], axis=0) 
         self._positions = np.concatenate(
             [self._positions, delta_p + self._positions[-1]]
         )
