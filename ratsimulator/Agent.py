@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 #sys.path.append("../") if "../" not in sys.path else None # avoid adding multiple relave paths to sys.path
-#from ratsimulator.Environment import RectanglewObjects
+from ratsimulator.Environment import RectanglewObjects
 
 
 def batch_trajectory_generator(batch_size=64, seq_len=20, *args, **kwargs):
@@ -54,7 +54,7 @@ class Agent:
         self.vfr = vfr #tuple of visual field angular range and radial range
         self.reset(angle0, p0)
         # TODO! Change condition below to check if environment is with objects
-        if True: #isinstance(environment, RectanglewObjects):
+        if isinstance(environment, RectanglewObjects):
             self.envm_objects = self.fetch_objects()
             self.objects_observed = self.check_for_objects(self.envm_objects) #[] #list of objs observed at given positions
             self.observe = True
