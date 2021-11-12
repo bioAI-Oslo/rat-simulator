@@ -128,11 +128,14 @@ class Agent:
 
             #TODO! Check if there is an obstacle/wall between agent and object
             #      This should block the visual field and object should not be stored.
-            alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object 
-            dist = np.linalg.norm(self.positions[-1] - obj_pos)
+            #alpha = np.arctan((obj_y-self.y)/(obj_x - self.x)) #angle between rat and object #TODO! Change to cos dot product rule
+            #alpha = self.angle_between_vectors(self.positions[-1], obj_pos.reshape(2,1).flatten())
+            RO_vec = obj_pos.flatten()- self.positions[-1]   #vector goes from rat to object
+            alpha = self.alpha(self.hds[-1], RO_vec)
+            dist = np.linalg.norm(self.positions[-1] - obj_pos.flatten())
             vfr_ang, vfr_r = self.vfr # visual field range
 
-            if (dist <= vfr_r) and (abs(self.hds[-1] - alpha) <= vfr_ang):
+            if (dist <= vfr_r) and (abs(alpha) <= vfr_ang): #TODO! Fix this part
                 #objects_id_seen.append(obj_id)
                 object_track_in_pose[0,i] = 1
 
@@ -195,3 +198,19 @@ class Agent:
             for pos, vel in zip(positions[::ds], self.velocities[::ds]):
                 ax.arrow(*pos, *vel, head_width=0.02, color=c[::ds][i])
                 i += 1
+
+    
+    def alpha(self, hd, RO_vec):
+        """Gives angle between the agent's head direction angle (hd) and 
+        the vector that goes from the rat/agent to object (RO)
+
+        """
+        h = np.array([np.cos(hd), np.sin(hd)])
+        alpha = self.angle_between_vectors(h, RO_vec)
+        return alpha
+
+    @staticmethod
+    def angle_between_vectors(a,b):
+        angle = np.arccos(np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b)))
+        return angle
+
