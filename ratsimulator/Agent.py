@@ -2,6 +2,7 @@ import numpy as np
 import sys
 #sys.path.append("../") if "../" not in sys.path else None # avoid adding multiple relave paths to sys.path
 from ratsimulator.Environment import RectanglewObjects
+from .Environment.methods import intersect, projection_rejection
 
 
 def batch_trajectory_generator(batch_size=64, seq_len=20, *args, **kwargs):
@@ -136,8 +137,10 @@ class Agent:
             vfr_ang, vfr_r = self.vfr # visual field range
 
             if (dist <= vfr_r) and (abs(alpha) <= vfr_ang): #TODO! Fix this part
-                #objects_id_seen.append(obj_id)
-                object_track_in_pose[0,i] = 1
+                for wall in self.environment.walls:
+                    if intersect(self.positions[-1], RO_vec, wall.bias, wall.slope, [0, np.inf], wall.t)[1] == False:
+                        #objects_id_seen.append(obj_id)
+                        object_track_in_pose[0,i] = 1
 
         return object_track_in_pose #objects_id_seen
 
