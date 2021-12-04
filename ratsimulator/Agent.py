@@ -88,11 +88,6 @@ class Agent:
             self.hds = np.append(self.hds, new_hd)
             self.turns = np.append(self.turns, new_turn)
 
-        if not self.environment.inside_environment(self.positions[-1]) and False:
-            print(self.speeds[-2:], self.hds[-2:], self.turns[-2:])
-            print(self.positions[-2:])
-            print(self.velocities[-2:])
-
         return new_speed, new_hd
 
     def avoid_walls(self, *args, **kwargs):
