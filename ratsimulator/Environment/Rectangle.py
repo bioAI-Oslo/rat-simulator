@@ -136,20 +136,3 @@ class Rectangle(ABCEnvironment):
 
         return ed
 
-    def avoid_walls(self, pos, hd, speed, turn):
-        # --- Regulate turn ---
-        ed = self.wall_rejection(pos)
-
-        # score next animal direction wrt. wall escape direction
-        score_p = ed @ [np.cos(hd + turn), np.sin(hd + turn)]
-        score_n = ed @ [np.cos(hd - turn), np.sin(hd - turn)]
-        if score_n > score_p:
-            turn = -turn  # turn away from wall
-
-        # --- Regulate speed ---
-        direction = np.array([np.cos(hd + turn), np.sin(hd + turn)])
-        intersection, _ = self.crash_point(pos, direction)
-
-        # speed is maximum half the distance to the crash point
-        speed = min(speed, euclidean(pos, intersection) / 2)
-        return speed, turn

@@ -21,12 +21,3 @@ class ABCEnvironment(metaclass=abc.ABCMeta):
         """
         pass
 
-    @abc.abstractmethod
-    def avoid_walls(self):
-        """
-        Implements walls in the environment.
-
-        An animal should not be able to reach positions
-        outside the boundaries of the environment.
-        """
-        pass
