@@ -1,0 +1,10 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - Family-names: "Schoeyen"
+    given-names: "Vemund"
+title: "Code for iScience paper: Coherently Remapping Toroidal Cells But Not Grid Cells are Responsible for Path Integration in Virtual Agents"
+version: v1.0
+doi: 10.5281/zenodo.8318064
+date-released: 2023-09-05
+URL: "https://github.com/bioAI-Oslo/rat-simulator"
